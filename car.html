@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashbord</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #cac6c6;
+            /* Light gray background color */
+        }
+
+        #road {
+            height: 100px;
+            background-image: url('road3.png');
+            background-size: cover;
+            position: relative;
+        }
+
+        .car {
+            width: 100px;
+            height: auto;
+            position: absolute;
+            bottom: 0;
+            transition: left 0.5s ease;
+        }
+
+        #car1 {
+            left: 0;
+        }
+
+        #car2 {
+            left: 20px;
+        }
+
+        .message {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: red;
+            display: none;
+            border: 5px solid red;
+            padding: 10px;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        #speed {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        #distance {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+
+        @media only screen and (max-width: 576px) and (orientation: landscape) {
+
+            .message {
+                font-size: 40px;
+            }
+
+            #speed {
+                font-size: 25px;
+                top: 70%;
+            }
+
+            #distance {
+                font-size: 25px;
+                top: 75%;
+            }
+        }
+
+        @media only screen and (min-width: 577px) and (max-width: 768px) and (orientation: landscape) {
+
+            .message {
+                font-size: 40px;
+            }
+
+            #speed {
+                font-size: 40px;
+                top: 65%;
+            }
+
+            #distance {
+                font-size: 35px;
+                top: 75%;
+            }
+        }
+
+        @media only screen and (min-width: 769px) and (max-width: 992px) and (orientation: landscape) {
+
+            #road {
+                height: 150px
+            }
+
+            .car {
+                width: 120px;
+            }
+
+            .message {
+                font-size: 20px;
+                top: 77%;
+            }
+
+            #speed {
+                font-size: 20px;
+                top: 85%;
+            }
+
+            #distance {
+                font-size: 20px;
+                top: 92%;
+            }
+        }
+
+        @media only screen and (min-width: 1280px) and (max-width: 1440px) {
+
+            #road {
+                height: 200px
+            }
+
+            .car {
+                width: 180px;
+            }
+
+            .message {
+                font-size: 40px;
+                top: 30%;
+            }
+
+            #speed {
+                font-size: 40px;
+                top: 50%;
+            }
+
+            #distance {
+                font-size: 50px;
+                top: 55%;
+            }
+        }
+
+        @media only screen and (min-width: 1200px) and (max-width: 1366px) {
+
+            #road {
+                height: 200px
+            }
+
+            .car {
+                width: 180px;
+            }
+
+            .message {
+                font-size: 40px;
+                top: 30%;
+            }
+
+            #speed {
+                font-size: 40px;
+                top: 50%;
+            }
+
+            #distance {
+                font-size: 50px;
+                top: 55%;
+            }
+        }
+
+        @media only screen and (min-width: 1600px) and (max-width: 2560px) {
+
+            #road {
+                height: 200px
+            }
+
+            .car {
+                width: 180px;
+            }
+
+            .message {
+                font-size: 50px;
+                top: 45%;
+            }
+
+            #speed {
+                font-size: 40px;
+                top: 55%;
+            }
+
+            #distance {
+                font-size: 50px;
+                top: 62%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="mt-3">Dashboard</h1>
+        <div class="row">
+            <div class="col-12">
+                <div id="road" class="mt-3 mb-3">
+                    <img id="car1" class="car" src="car.png" alt="Car">
+                    <img id="car2" class="car" src="car2.png" alt="Car">
+                </div>
+            </div>
+        </div>
+        <div class="message" id="message">Warning!</div>
+        <div id="speed">Speed: <span id="speedValue">0</span> km/h</div>
+        <div id="distance">Distance: <span id="distanceValue">0</span> cm</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_RKQACUisTEbKecu7hBwfJYGehc5Y7Pk",
+            authDomain: "virtusa-project-3f73a.firebaseapp.com",
+            databaseURL: "https://virtusa-project-3f73a-default-rtdb.firebaseio.com",
+            projectId: "virtusa-project-3f73a",
+            storageBucket: "virtusa-project-3f73a.appspot.com",
+            messagingSenderId: "695109637628",
+            appId: "1:695109637628:web:34782596897dd96564ce79",
+            measurementId: "G-99KMKR172T"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase();
+        const sensorValuesRef = ref(database, 'Virtusa/SensorValues/cm');
+
+        onValue(sensorValuesRef, (snapshot) => {
+            const cmValue = snapshot.val();
+            moveCar(cmValue);
+        });
+
+        function moveCar(cmValue) {
+            const roadWidth = document.getElementById('road').offsetWidth;
+            const carWidth = document.getElementsByClassName('car')[0].offsetWidth;
+            const maxPosition = roadWidth - carWidth;
+            const threshold = 294;
+
+            // Check if cmValue is within the range of 0 to 20 cm
+            if (cmValue >= 0 && cmValue <= 20) {
+                let newPosition1 = (cmValue / 20) * maxPosition;
+
+                // Move the car within the road
+                if (newPosition1 > threshold) {
+                    document.getElementById('car1').style.left = newPosition1 + 'px';
+                    document.getElementById('message').style.display = 'none';
+                } else {
+                    newPosition1 = threshold;
+                    document.getElementById('car1').style.left = newPosition1 + 'px';
+                    document.getElementById('message').style.display = 'block';
+                }
+
+                document.getElementById('car2').style.left = '20px';
+
+                const speed = cmValue * 0.0568182;
+                document.getElementById('speedValue').textContent = speed.toFixed(1);
+
+                document.getElementById('distanceValue').textContent = cmValue;
+            } else {
+                // Reset car position and display a message
+                document.getElementById('car1').style.left = '1080px';
+                document.getElementById('message').style.display = 'none';
+                document.getElementById('car2').style.left = '20px';
+                document.getElementById('speedValue').textContent = '0';
+                document.getElementById('distanceValue').textContent = '0';
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
